@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Test Handle File in Worker</title>
+</head>
+<body>
+    <input type="file" id="file" />
+    <script type="text/js-worker">
+      function log(msg) {
+        postMessage(msg);
+      }
+
+      // This script WON'T be parsed by JS engines because its mime-type is text/js-worker.
+      onmessage = function (oEvent) {
+        processFile(oEvent.data);
+      };
+
+      function processFile(url) {
+        // Get Blob object from blob url.
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onreadystatechange = function(e) {
+          if (xhr.readyState == 4) {
+            var myBlob = this.response;
+            try {
+              // process data from blob
+              var text = new FileReaderSync().readAsText(myBlob);
+              // Create a new blob
+              var newBlob = new Blob(['!!!Hacked in worker!!!' + text], { type: 'text/html' } );
+              // Send the new blob url back to main thread
+              log(URL.createObjectURL(newBlob));
+            } catch (e) {
+              log("error: " + e);
+            }
+          }
+        };
+
+        xhr.onerror = function(e) {
+          postMessage('error');
+        };
+
+        xhr.send();
+      }
+      // Rest of your worker code goes here.
+    </script>
+
+    <script type="text/javascript">
+    function log(msg) {
+      alert(msg);
+    }
+
+    function onFileChange(evt) {
+      var files = evt.target.files;
+      for (var i = 0; i < files.length; i++) {
+        var blobURL = window.URL.createObjectURL(files[i]);
+        document.worker.postMessage(blobURL);
+      }
+    }
+
+    function startWorker() {
+      var blob = new Blob(Array.prototype.map.call(
+                   document.querySelectorAll("script[type=\"text\/js-worker\"]"),
+                   function (oScript) { return oScript.textContent; }),
+                   { type: "text/javascript"});
+
+      // Creating a new document.worker property containing all our
+      document.worker = new Worker(window.URL.createObjectURL(blob));
+
+      document.worker.onmessage = function(event) {
+        var url = event.data;
+
+        var xhr = new XMLHttpRequest();
+        xhr.open('GET', url, true);
+        xhr.responseType = 'blob';
+        xhr.onreadystatechange = function(e) {
+          if (xhr.readyState == 4) {
+            var modifiedBlob = this.response;
+            try {
+              // process data from blob
+              var reader = new FileReader();
+
+              reader.addEventListener('loadend', function() {
+                log(reader.result);
+              });
+
+              reader.readAsText(modifiedBlob);
+            } catch (e) {
+              log("error: " + e);
+            }
+          }
+        };
+
+        xhr.onerror = function(e) {
+          postMessage('error');
+        };
+
+        xhr.send();
+      };
+    }
+
+    window.addEventListener('load', function() {
+      document.getElementById('file').addEventListener('change', onFileChange);
+      startWorker();
+    });
+    </script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Media Recording</title>
+</head>
+<body>
+  <audio id="audio" controls src=""></audio>
+
+  <video id="video" controls src=""></video>
+
+  <script type="text/javascript">
+  function log(msg) {
+    alert(msg);
+  }
+
+  function getAudioInput() {
+    navigator.mozGetUserMedia({
+      audio: true,
+      video: true
+    }, function onGetMedia(localMediaStream) {
+      document.getElementById('video').src =
+        window.URL.createObjectURL(localMediaStream);
+    }, function onError(err) {
+      log('Error occurs when fetching media: ' + err);
+    });
+  }
+
+  window.addEventListener('load', function onload(evt) {
+    getAudioInput();
+  });
+  </script>
+</body>
+</html>
+

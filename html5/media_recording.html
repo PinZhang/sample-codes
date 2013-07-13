@@ -5,28 +5,79 @@
     <title>Media Recording</title>
 </head>
 <body>
-  <audio id="audio" controls src=""></audio>
-
-  <video id="video" controls src=""></video>
+  <div id="logger">LOG</div>
+  <audio id="audio" controls autoplay ></audio>
+  <br/>
+  <audio id="playback" controls autoplay></audio>
 
   <script type="text/javascript">
+  var mediaRecorder = null;
+
   function log(msg) {
-    alert(msg);
+    // alert(msg);
+    document.getElementById('logger').textContent = msg;
+  }
+
+  var count = 0;
+  function startRecording(stream) {
+      var audioElem = document.getElementById('audio');
+      mediaRecorder = new MediaRecorder(stream); //audioElem.mozCaptureStreamUntilEnded());
+
+      mediaRecorder.ondataavailable = function ondataavailable(e) {
+        count++;
+        // TODO concat blob
+        if (count > 1)
+          return;
+
+        log(e.data + " " + count);
+        document.getElementById('playback').src =
+          window.URL.createObjectURL(e.data);
+      };
+
+      mediaRecorder.onerror = function onerror(e) {
+        log(e);
+      };
+
+      mediaRecorder.onwarning = function onwarning(e) {
+        log('warning: ' + e);
+      };
+
+      mediaRecorder.onstop = function onstop(e) {
+        log('recorder stopped');
+      };
+
+      mediaRecorder.start(1000);
+
+      window.setTimeout(function stopMediaRecorder() {
+        log('stop recorder: ' + mediaRecorder.state);
+        mediaRecorder.stop();
+      }, 10000);
   }
 
   function getAudioInput() {
     navigator.mozGetUserMedia({
       audio: true,
-      video: true
+      video: false
     }, function onGetMedia(localMediaStream) {
-      document.getElementById('video').src =
-        window.URL.createObjectURL(localMediaStream);
+      var audioElem = document.getElementById('audio');
+
+      //audioElem.src = 'sound.ogg';
+      audioElem.src = window.URL.createObjectURL(localMediaStream);
+
+      // <audio> is hidden when permission prompt is shown, should be a bug ....
+      audioElem.style.display = 'block';
+
+      startRecording(localMediaStream);
     }, function onError(err) {
       log('Error occurs when fetching media: ' + err);
     });
   }
 
   window.addEventListener('load', function onload(evt) {
+    if (!MediaRecorder || !navigator.mozGetUserMedia) {
+      log('Please try this on latest Firefox Nightly!');
+    }
+
     getAudioInput();
   });
   </script>

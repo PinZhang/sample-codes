@@ -67,7 +67,7 @@
       // <audio> is hidden when permission prompt is shown, should be a bug ....
       audioElem.style.display = 'block';
 
-      startRecording(localMediaStream);
+      startRecording(audioElem.mozCaptureStreamUntilEnded());
     }, function onError(err) {
       log('Error occurs when fetching media: ' + err);
     });

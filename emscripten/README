@@ -1,0 +1,7 @@
+How to run test codes
+===
+
+  $ cd ccall
+  $ ./build.sh
+  $ node a.out.js
+

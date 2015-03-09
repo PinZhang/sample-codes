@@ -12,7 +12,7 @@ public:
   SampleClassA(int aValue);
 
   void setValue(int aValue);
-  int getValue();
+  int getValue() const;
 
   static void printSomething();
 };

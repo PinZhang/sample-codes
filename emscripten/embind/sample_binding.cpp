@@ -11,9 +11,7 @@ EMSCRIPTEN_BINDINGS(cpp_funcs) {
 EMSCRIPTEN_BINDINGS(cpp_class) {
   class_<SampleClassA>("SampleClassA")
     .constructor<int>()
-    .function("getValue", &SampleClassA::getValue)
-    .function("setValue", &SampleClassA::setValue)
-  //  .property("value", &SampleClassA::getValue, &SampleClassA::setValue)
+    .property("value", &SampleClassA::getValue, &SampleClassA::setValue)
     .class_function("printSomething", &SampleClassA::printSomething)
     ;
 }

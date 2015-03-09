@@ -6,7 +6,9 @@ var str = "This is test string";
 console.log("cpp_strlen('" + str + "'): " + Module.cpp_strlen(str));
 
 var sampleObj = new Module.SampleClassA(100);
-console.log("SampleClassA::getValue: " + sampleObj.getValue());
+console.log("SampleClassA::value: " + sampleObj.value);
+sampleObj.value += 20;
+console.log("After adding 20, now SampleClassA::value is: " + sampleObj.value);
 Module.SampleClassA.printSomething()
 sampleObj.delete();
 

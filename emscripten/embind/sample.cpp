@@ -22,7 +22,7 @@ SampleClassA::setValue(int aValue) {
 }
 
 int
-SampleClassA::getValue() {
+SampleClassA::getValue() const {
   return value;
 }
 
